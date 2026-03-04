@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub API - Test</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #f0f0f0; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
+        input, button { padding: 10px; margin: 5px; font-size: 14px; }
+        button { cursor: pointer; background: #007bff; color: white; border: none; border-radius: 4px; }
+        button:hover { background: #0056b3; }
+        #results { margin-top: 20px; border: 1px solid #ddd; padding: 10px; border-radius: 4px; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 GitHub API Test</h1>
+        
+        <div>
+            <label>Usuario: </label>
+            <input type="text" id="usuarioInput" placeholder="facebook" value="facebook">
+            <button onclick="testBuscar()">Buscar Repos</button>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="./assets/js/config.js"></script>
+    
+    <script>
+        // El token viene de config.js
+        const TOKEN = GITHUB_TOKEN;
+
+        async function testBuscar() {
+            const results = document.getElementById('results');
+            const usuario = document.getElementById('usuarioInput').value;
+            
+            results.innerHTML = '<p>Cargando...</p>';
+
+            try {
+                const response = await axios.get(`https://api.github.com/users/${usuario}/repos`, {
+                    headers: { 'Authorization': `token ${TOKEN}` },
+                    timeout: 10000
+                });
+
+                results.innerHTML = `
+                    <p class="success">✅ Éxito! Encontré ${response.data.length} repos</p>
+                    <pre>${JSON.stringify(response.data.slice(0, 2), null, 2)}</pre>
+                `;
+            } catch (error) {
+                results.innerHTML = `
+                    <p class="error">❌ Error: ${error.message}</p>
+                    <p>Status: ${error.response?.status}</p>
+                `;
+            }
+        }
+
+        // Test automático al cargar
+        window.addEventListener('load', () => {
+            console.log('✅ Página cargada');
+            document.getElementById('results').innerHTML = '<p class="success">✅ Página lista. Click en "Buscar Repos"</p>';
+        });
+    </script>
+</body>
+</html>

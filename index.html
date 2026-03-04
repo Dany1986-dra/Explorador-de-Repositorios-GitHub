@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Explorador de repositorios de GitHub con Axios">
+    <meta name="keywords" content="GitHub, API, Repositorios, JavaScript, Axios, RESTful">
+    <meta name="author" content="Daniel Rivera Alpízar">
+    <meta name="robots" content="index, follow">
+    
+    <link rel="stylesheet" href="assets/css/normalize.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- Axios: Cliente HTTP simplificado para solicitudes a APIs -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    
+    <title>Explorador de Repositorios GitHub</title>
+</head>
+
+<body>
+    <!-- Encabezado Principal -->
+    <header role="banner">
+        <h1>Explorador de Repositorios GitHub</h1>
+        <p>Busca y gestiona repositorios en GitHub mediante la API REST</p>
+    </header>
+
+    <!-- Contenedor Principal -->
+    <main class="container" role="main">
+        
+        <!-- Sección de búsqueda -->
+        <section class="search-section" role="search">
+            <div class="search-container">
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    class="search-input"
+                    placeholder="Ingresa un nombre de usuario"
+                    aria-label="Buscar usuario de GitHub"
+                    autocomplete="username">
+                <button 
+                    type="button" 
+                    id="searchButton" 
+                    class="btn btn-primary"
+                    aria-label="Buscar repositorios">
+                    Buscar
+                </button>
+            </div>
+        </section>
+
+        <!-- Mensajes de estado -->
+        <section class="messages" role="status" aria-live="polite" aria-atomic="true">
+            <div id="errorMessage" class="alert alert-error" role="alert" hidden></div>
+            <div id="successMessage" class="alert alert-success" role="alert" hidden></div>
+            <div id="loading" class="alert alert-loading" role="status" hidden>
+                <span>Cargando repositorios...</span>
+            </div>
+        </section>
+
+        <!-- Sección de acciones -->
+        <section id="acciones" class="actions-section" hidden>
+            <h2>Acciones de GitHub</h2>
+            <div class="action-buttons">
+                <button 
+                    type="button" 
+                    id="createRepoBtn" 
+                    class="btn btn-secondary"
+                    data-modal="createRepoForm"
+                    aria-label="Abrir formulario para crear repositorio">
+                    Crear Repositorio
+                </button>
+            </div>
+
+            <!-- Modal: Crear Repositorio -->
+            <dialog id="createRepoForm" class="modal" aria-labelledby="createRepoTitle">
+                <div class="modal-content">
+                    <button 
+                        type="button" 
+                        class="btn-close" 
+                        aria-label="Cerrar modal">
+                        &times;
+                    </button>
+                    <h3 id="createRepoTitle">Crear Nuevo Repositorio</h3>
+                    <form id="createRepoFormElement" class="modal-form">
+                        <div class="form-group">
+                            <label for="newRepoName">Nombre del Repositorio:</label>
+                            <input 
+                                type="text" 
+                                id="newRepoName" 
+                                placeholder="mi-nuevo-repo"
+                                required
+                                aria-required="true">
+                        </div>
+                        <div class="form-group">
+                            <label for="newRepoDesc">Descripción:</label>
+                            <textarea 
+                                id="newRepoDesc" 
+                                placeholder="Descripción del repositorio"
+                                rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="newRepoPrivate">Privacidad:</label>
+                            <select id="newRepoPrivate" required aria-required="true">
+                                <option value="false">Público</option>
+                                <option value="true">Privado</option>
+                            </select>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Crear Repositorio</button>
+                            <button type="reset" class="btn btn-secondary">Limpiar</button>
+                        </div>
+                    </form>
+                </div>
+            </dialog>
+
+            <!-- Modal: Agregar Archivo -->
+            <dialog id="addFileForm" class="modal" aria-labelledby="addFileTitle">
+                <div class="modal-content">
+                    <button 
+                        type="button" 
+                        class="btn-close" 
+                        aria-label="Cerrar modal">
+                        &times;
+                    </button>
+                    <h3 id="addFileTitle">Agregar Archivo al Repositorio</h3>
+                    <form id="addFileFormElement" class="modal-form">
+                        <div class="form-group">
+                            <label for="filePath">Ruta del Archivo:</label>
+                            <input 
+                                type="text" 
+                                id="filePath" 
+                                placeholder="README.md"
+                                required
+                                aria-required="true">
+                        </div>
+                        <div class="form-group">
+                            <label for="fileContent">Contenido:</label>
+                            <textarea 
+                                id="fileContent" 
+                                placeholder="# Mi Repositorio"
+                                rows="6"
+                                required
+                                aria-required="true"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="fileCommitMsg">Mensaje de Commit:</label>
+                            <input 
+                                type="text" 
+                                id="fileCommitMsg" 
+                                placeholder="Agregar archivo"
+                                required
+                                aria-required="true">
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Agregar Archivo</button>
+                            <button type="reset" class="btn btn-secondary">Limpiar</button>
+                        </div>
+                    </form>
+                </div>
+            </dialog>
+
+            <!-- Modal: Eliminar Archivo -->
+            <dialog id="deleteFileForm" class="modal" aria-labelledby="deleteFileTitle">
+                <div class="modal-content">
+                    <button 
+                        type="button" 
+                        class="btn-close" 
+                        aria-label="Cerrar modal">
+                        &times;
+                    </button>
+                    <h3 id="deleteFileTitle">Eliminar Archivo del Repositorio</h3>
+                    <form id="deleteFileFormElement" class="modal-form">
+                        <div class="form-group">
+                            <label for="delFilePath">Ruta del Archivo:</label>
+                            <input 
+                                type="text" 
+                                id="delFilePath" 
+                                placeholder="README.md"
+                                required
+                                aria-required="true">
+                        </div>
+                        <div class="form-group">
+                            <label for="delCommitMsg">Mensaje de Commit:</label>
+                            <input 
+                                type="text" 
+                                id="delCommitMsg" 
+                                placeholder="Eliminar archivo"
+                                required
+                                aria-required="true">
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-danger">Eliminar Archivo</button>
+                            <button type="reset" class="btn btn-secondary">Limpiar</button>
+                        </div>
+                    </form>
+                </div>
+            </dialog>
+        </section>
+
+        <!-- Contenedor de repositorios -->
+        <section class="repos-section">
+            <div id="reposContainer" class="repos-container" role="region" aria-label="Lista de repositorios"></div>
+        </section>
+    </main>
+
+    <!-- Scripts -->
+    <script src="./assets/js/config.js"></script>
+    <script src="./assets/js/ui.js"></script>
+    <script src="./assets/js/api.js"></script>
+    <script src="./assets/js/app.js"></script>
+</body>
+
+</html>
