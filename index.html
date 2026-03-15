@@ -19,6 +19,8 @@
 </head>
 
 <body>
+    <a href="#mainContent" class="skip-link">Saltar al contenido principal</a>
+
     <!-- Encabezado Principal -->
     <header role="banner">
         <h1>Explorador de Repositorios GitHub</h1>
@@ -26,26 +28,30 @@
     </header>
 
     <!-- Contenedor Principal -->
-    <main class="container" role="main">
+    <main id="mainContent" class="container" role="main" tabindex="-1">
         
         <!-- Sección de búsqueda -->
-        <section class="search-section" role="search">
-            <div class="search-container">
+        <section class="search-section" role="search" aria-label="Buscar repositorios por usuario">
+            <form id="searchForm" class="search-container" novalidate>
+                <label for="searchInput" class="sr-only">Nombre de usuario de GitHub</label>
                 <input 
                     type="text" 
                     id="searchInput" 
                     class="search-input"
                     placeholder="Ingresa un nombre de usuario"
                     aria-label="Buscar usuario de GitHub"
+                    aria-describedby="searchHelp"
                     autocomplete="username">
                 <button 
-                    type="button" 
+                    type="submit" 
                     id="searchButton" 
                     class="btn btn-primary"
-                    aria-label="Buscar repositorios">
+                    aria-label="Buscar repositorios"
+                    aria-controls="reposContainer">
                     Buscar
                 </button>
-            </div>
+                <p id="searchHelp" class="sr-only">Escribe un usuario y presiona Enter para consultar sus repositorios públicos.</p>
+            </form>
         </section>
 
         <!-- Mensajes de estado -->
@@ -55,11 +61,12 @@
             <div id="loading" class="alert alert-loading" role="status" hidden>
                 <span>Cargando repositorios...</span>
             </div>
+            <div id="resultsAnnouncer" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
         </section>
 
         <!-- Sección de acciones -->
-        <section id="acciones" class="actions-section" hidden>
-            <h2>Acciones de GitHub</h2>
+        <section id="acciones" class="actions-section" aria-labelledby="accionesTitle" hidden>
+            <h2 id="accionesTitle">Acciones de GitHub</h2>
             <div class="action-buttons">
                 <button 
                     type="button" 
@@ -72,7 +79,7 @@
             </div>
 
             <!-- Modal: Crear Repositorio -->
-            <dialog id="createRepoForm" class="modal" aria-labelledby="createRepoTitle">
+            <dialog id="createRepoForm" class="modal" aria-labelledby="createRepoTitle" aria-modal="true">
                 <div class="modal-content">
                     <button 
                         type="button" 
@@ -81,7 +88,7 @@
                         &times;
                     </button>
                     <h3 id="createRepoTitle">Crear Nuevo Repositorio</h3>
-                    <form id="createRepoFormElement" class="modal-form">
+                    <form id="createRepoFormElement" class="modal-form" aria-label="Formulario para crear repositorio">
                         <div class="form-group">
                             <label for="newRepoName">Nombre del Repositorio:</label>
                             <input 
@@ -114,7 +121,7 @@
             </dialog>
 
             <!-- Modal: Agregar Archivo -->
-            <dialog id="addFileForm" class="modal" aria-labelledby="addFileTitle">
+            <dialog id="addFileForm" class="modal" aria-labelledby="addFileTitle" aria-modal="true">
                 <div class="modal-content">
                     <button 
                         type="button" 
@@ -123,7 +130,7 @@
                         &times;
                     </button>
                     <h3 id="addFileTitle">Agregar Archivo al Repositorio</h3>
-                    <form id="addFileFormElement" class="modal-form">
+                    <form id="addFileFormElement" class="modal-form" aria-label="Formulario para agregar archivo">
                         <div class="form-group">
                             <label for="filePath">Ruta del Archivo:</label>
                             <input 
@@ -160,7 +167,7 @@
             </dialog>
 
             <!-- Modal: Eliminar Archivo -->
-            <dialog id="deleteFileForm" class="modal" aria-labelledby="deleteFileTitle">
+            <dialog id="deleteFileForm" class="modal" aria-labelledby="deleteFileTitle" aria-modal="true">
                 <div class="modal-content">
                     <button 
                         type="button" 
@@ -169,7 +176,7 @@
                         &times;
                     </button>
                     <h3 id="deleteFileTitle">Eliminar Archivo del Repositorio</h3>
-                    <form id="deleteFileFormElement" class="modal-form">
+                    <form id="deleteFileFormElement" class="modal-form" aria-label="Formulario para eliminar archivo">
                         <div class="form-group">
                             <label for="delFilePath">Ruta del Archivo:</label>
                             <input 
@@ -199,7 +206,8 @@
 
         <!-- Contenedor de repositorios -->
         <section class="repos-section">
-            <div id="reposContainer" class="repos-container" role="region" aria-label="Lista de repositorios"></div>
+            <h2 id="reposHeading" class="sr-only">Resultados de repositorios</h2>
+            <div id="reposContainer" class="repos-container" role="region" aria-labelledby="reposHeading" aria-busy="false" tabindex="-1"></div>
         </section>
     </main>
 

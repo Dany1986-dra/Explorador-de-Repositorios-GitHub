@@ -1,0 +1,16 @@
+# Archivo de configuración con información sensible
+assets/js/config.js
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Dependencias (si las hubiera)
+node_modules/

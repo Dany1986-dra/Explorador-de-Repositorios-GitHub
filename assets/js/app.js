@@ -13,6 +13,7 @@ let usuarioActual = null; // Usuario siendo consultado
 // Se inicializan en DOMContentLoaded
 let searchInput = null;
 let searchButton = null;
+let searchForm = null;
 let createRepoBtn = null;
 
 // ============================================================
@@ -26,27 +27,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // Obtener referencias al DOM (AHORA el DOM está listo)
     searchInput = getElement('searchInput');
     searchButton = getElement('searchButton');
+    searchForm = getElement('searchForm');
     createRepoBtn = getElement('createRepoBtn');
 
     // Verificar que los elementos existan
-    if (!searchInput || !searchButton) {
+    if (!searchInput || !searchButton || !searchForm) {
         console.error('Error: No se encontraron elementos del DOM');
         return;
     }
 
     // Configurar eventos de búsqueda
-    searchButton.addEventListener('click', manejarBusqueda);
-    searchInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            manejarBusqueda();
-        }
-    });
+    searchForm.addEventListener('submit', manejarBusqueda);
 
     // Configurar botón crear repositorio
     if (createRepoBtn) {
-        createRepoBtn.addEventListener('click', () => {
-            abrirModal('createRepoForm');
-        });
+        createRepoBtn.setAttribute('aria-haspopup', 'dialog');
     }
 
     // Configurar eventos de formularios
@@ -73,27 +68,40 @@ function reiniciarInterfaz() {
 /**
  * Maneja la búsqueda de repositorios
  */
-async function manejarBusqueda() {
+async function manejarBusqueda(event) {
+    if (event) {
+        event.preventDefault();
+    }
+
     const usuario = searchInput.value.trim();
+    const reposContainer = getElement('reposContainer');
 
     if (!usuario) {
         mostrarError('Por favor, ingresa un nombre de usuario.');
+        anunciarEstado('Debes ingresar un nombre de usuario para iniciar la búsqueda.');
         return;
     }
 
     usuarioActual = usuario;
     repoActual = null;
     reiniciarInterfaz();
+    reposContainer.setAttribute('aria-busy', 'true');
+    anunciarEstado(`Buscando repositorios de ${usuario}.`);
     mostrarCargando();
 
     try {
         const repos = await buscarRepositoriosAPI(usuario);
-        mostrarRepositorios(repos);
+        const cantidad = mostrarRepositorios(repos);
+        anunciarEstado(`Se cargaron ${cantidad} repositorios para ${usuario}.`);
         mostrarElemento('acciones');
+        reposContainer.focus();
         ocultarCargando();
     } catch (error) {
         mostrarError(error.message);
+        anunciarEstado(`Error en la búsqueda: ${error.message}`);
         ocultarCargando();
+    } finally {
+        reposContainer.setAttribute('aria-busy', 'false');
     }
 }
 
@@ -110,8 +118,9 @@ function mostrarRepositorios(repos) {
 
     if (!repos || repos.length === 0) {
         mostrarError('Este usuario no tiene repositorios públicos.');
+        anunciarEstado('No se encontraron repositorios públicos para este usuario.');
         container.innerHTML = '';
-        return;
+        return 0;
     }
 
     container.innerHTML = '';
@@ -120,6 +129,8 @@ function mostrarRepositorios(repos) {
         const tarjeta = crearTarjetaRepositorio(repo);
         container.appendChild(tarjeta);
     });
+
+    return repos.length;
 }
 
 /**

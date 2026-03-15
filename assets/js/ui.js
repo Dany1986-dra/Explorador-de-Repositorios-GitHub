@@ -7,6 +7,8 @@
 // UTILIDADES DE INTERFAZ
 // ============================================================
 
+const focusStateByModal = new Map();
+
 /**
  * Obtiene un elemento del DOM
  * @param {string} id - ID del elemento
@@ -96,7 +98,13 @@ function ocultarCargando() {
 function abrirModal(modalId) {
     const modal = getElement(modalId);
     if (modal && modal.tagName === 'DIALOG') {
+        focusStateByModal.set(modalId, document.activeElement);
         modal.showModal();
+
+        const firstFocusable = modal.querySelector('input, textarea, select, button, [href], [tabindex]:not([tabindex="-1"])');
+        if (firstFocusable) {
+            firstFocusable.focus();
+        }
     }
 }
 
@@ -108,7 +116,29 @@ function cerrarModal(modalId) {
     const modal = getElement(modalId);
     if (modal && modal.tagName === 'DIALOG') {
         modal.close();
+
+        const previousFocus = focusStateByModal.get(modalId);
+        if (previousFocus && typeof previousFocus.focus === 'function') {
+            previousFocus.focus();
+        }
+        focusStateByModal.delete(modalId);
     }
+}
+
+/**
+ * Anuncia cambios dinámicos para lectores de pantalla
+ * @param {string} mensaje - Mensaje a anunciar
+ */
+function anunciarEstado(mensaje) {
+    const announcer = getElement('resultsAnnouncer');
+    if (!announcer) {
+        return;
+    }
+
+    announcer.textContent = '';
+    requestAnimationFrame(() => {
+        announcer.textContent = mensaje;
+    });
 }
 
 /**
@@ -162,7 +192,7 @@ function configurarEventosModales() {
         button.addEventListener('click', (e) => {
             const dialog = e.target.closest('dialog');
             if (dialog) {
-                dialog.close();
+                cerrarModal(dialog.id);
             }
         });
     });
@@ -172,11 +202,31 @@ function configurarEventosModales() {
     dialogs.forEach(dialog => {
         dialog.addEventListener('cancel', (e) => {
             e.preventDefault();
+            cerrarModal(dialog.id);
         });
 
         dialog.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                dialog.close();
+                cerrarModal(dialog.id);
+            }
+
+            if (e.key === 'Tab') {
+                const focusableElements = dialog.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+                if (!focusableElements.length) {
+                    e.preventDefault();
+                    return;
+                }
+
+                const firstElement = focusableElements[0];
+                const lastElement = focusableElements[focusableElements.length - 1];
+
+                if (e.shiftKey && document.activeElement === firstElement) {
+                    e.preventDefault();
+                    lastElement.focus();
+                } else if (!e.shiftKey && document.activeElement === lastElement) {
+                    e.preventDefault();
+                    firstElement.focus();
+                }
             }
         });
     });

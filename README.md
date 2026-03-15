@@ -12,6 +12,8 @@
 
 - [Descripción General](#descripción-general)
 - [Características](#características)
+- [Compromiso con la Accesibilidad (A11y)](#-compromiso-con-la-accesibilidad-a11y)
+- [Checklist QA A11y (Evidencias)](#-checklist-qa-a11y-evidencias)
 - [Inicio Rápido](#inicio-rápido)
 - [Estructura del Proyecto](#estructura-del-proyecto)
 - [Arquitectura Modular](#arquitectura-modular)
@@ -64,6 +66,47 @@
 - Mensajes de error y éxito
 - Indicador de carga
 - Accesibilidad ARIA completa
+
+---
+
+## ♿ Compromiso con la Accesibilidad (A11y)
+
+Como desarrollador con baja visión, he auditado este proyecto para garantizar que cumple con las pautas **WCAG 2.1**:
+- **Semántica:** Uso estricto de etiquetas HTML5 y roles ARIA.
+- **Interactividad:** Navegación completa mediante teclado y gestión de foco.
+- **Dinámica:** Regiones `aria-live` para anunciar cambios en los resultados de la API.
+
+---
+
+## ✅ Checklist QA A11y (Evidencias)
+
+Esta lista está pensada como evidencia rápida para revisiones de QA y auditorías internas.
+
+| Criterio QA | Implementación | Evidencia esperada en prueba |
+|-------------|----------------|-------------------------------|
+| **Landmarks semánticos** | `header`, `main`, `section` con roles y etiquetas | Navegación por regiones en lector de pantalla sin ambigüedad |
+| **Skip link** | Enlace "Saltar al contenido principal" al inicio de página | Al presionar `Tab` en la primera interacción, aparece el enlace y mueve foco a `main` |
+| **Formularios etiquetados** | Inputs con `label` asociado y ayudas `aria-describedby` | Lectura correcta de nombre, propósito y ayuda del campo |
+| **Estados dinámicos** | Regiones `aria-live` para mensajes y resultados | El lector anuncia búsqueda, resultados, errores y estados de carga |
+| **Carga asíncrona** | `aria-busy` durante consultas a la API | Cambio de estado ocupado/libre verificable durante peticiones |
+| **Modales accesibles** | `dialog` con `aria-modal`, enfoque inicial y retorno de foco | Apertura/cierre consistente por teclado, foco nunca "se pierde" |
+| **Trampa de foco en modal** | Gestión de `Tab`/`Shift+Tab` dentro del diálogo | El foco cicla dentro del modal hasta cerrarlo |
+| **Acciones por teclado** | Búsqueda por `Enter` y controles accionables por teclado | Flujo completo sin uso de mouse |
+| **Foco visible** | Estilos `:focus-visible` en controles principales | Contorno visible y consistente en navegación por teclado |
+| **Mensajes de estado** | Roles `alert`/`status` para éxito, error y carga | Retroalimentación inmediata y comprensible para tecnologías asistivas |
+
+### Protocolo de Validación Rápida (QA)
+1. Abrir `index.html` y navegar toda la interfaz solo con teclado (`Tab`, `Shift+Tab`, `Enter`, `Escape`).
+2. Verificar que el enlace de salto aparece al primer `Tab`.
+3. Ejecutar una búsqueda y confirmar anuncios de estado (inicio, éxito/error y total de resultados).
+4. Abrir cada modal y validar: foco inicial, ciclo interno y retorno de foco al cerrar.
+5. Revisar visualmente el foco en botones, enlaces e inputs en desktop y viewport móvil.
+6. Repetir validación básica en `test.html` y `diagnostico.html`.
+
+### Herramientas Recomendadas
+- Lighthouse (Accessibility)
+- axe DevTools
+- NVDA o VoiceOver
 
 ---
 

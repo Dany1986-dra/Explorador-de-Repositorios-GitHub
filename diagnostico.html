@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Diagnóstico técnico de módulos, elementos DOM y estado de ejecución del cliente GitHub API.">
     <title>🔧 Diagnóstico - GitHub API Client</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -74,17 +75,60 @@
             overflow-x: auto;
             margin-top: 10px;
         }
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        .skip-link {
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform: translateY(-120%);
+            background: #111827;
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 14px;
+            border-radius: 0 0 6px 0;
+            z-index: 999;
+        }
+        .skip-link:focus,
+        .skip-link:focus-visible {
+            transform: translateY(0);
+            outline: 3px solid #f59e0b;
+        }
+        a:focus-visible,
+        button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible,
+        select:focus-visible {
+            outline: 3px solid #0366d6;
+            outline-offset: 2px;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
+    <a href="#mainContent" class="skip-link">Saltar al contenido principal</a>
+
+    <header role="banner" class="container" style="margin-bottom: 14px;">
         <h1>🔧 Diagnóstico del Proyecto</h1>
-        <div id="diagnostics"></div>
-    </div>
+    </header>
+
+    <main id="mainContent" class="container" role="main" tabindex="-1">
+        <section id="diagnostics" role="region" aria-label="Resultados de diagnóstico" aria-live="polite" aria-busy="true"></section>
+        <div id="diagAnnouncer" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+    </main>
 
     <script>
         // Elemento para mostrar resultados
         const diagnosticsDiv = document.getElementById('diagnostics');
+        const diagAnnouncer = document.getElementById('diagAnnouncer');
 
         function addTest(title, condition, details = '') {
             const className = condition ? 'success' : 'error';
@@ -192,6 +236,9 @@
             <p style="margin-top: 15px; font-style: italic; color: #999;">Si encuentras errores, cópialos y comparte aquí</p>
         `;
         diagnosticsDiv.appendChild(instructions);
+
+        diagnosticsDiv.setAttribute('aria-busy', 'false');
+        diagAnnouncer.textContent = `Diagnóstico completado. Pasados ${passed}, fallados ${failed} y advertencias ${diagnosticsDiv.querySelectorAll('.test.warning').length}.`;
     </script>
 </body>
 </html>
