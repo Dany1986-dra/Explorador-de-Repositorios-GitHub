@@ -15,6 +15,7 @@
 - [Compromiso con la Accesibilidad (A11y)](#-compromiso-con-la-accesibilidad-a11y)
 - [Checklist QA A11y (Evidencias)](#-checklist-qa-a11y-evidencias)
 - [Inicio Rápido](#inicio-rápido)
+- [Utilidades de QA](#-utilidades-de-qa)
 - [Estructura del Proyecto](#estructura-del-proyecto)
 - [Arquitectura Modular](#arquitectura-modular)
 - [Módulos JavaScript](#módulos-javascript)
@@ -101,7 +102,7 @@ Esta lista está pensada como evidencia rápida para revisiones de QA y auditor�
 3. Ejecutar una búsqueda y confirmar anuncios de estado (inicio, éxito/error y total de resultados).
 4. Abrir cada modal y validar: foco inicial, ciclo interno y retorno de foco al cerrar.
 5. Revisar visualmente el foco en botones, enlaces e inputs en desktop y viewport móvil.
-6. Repetir validación básica en `test.html` y `diagnostico.html`.
+6. Repetir validación básica en `qa/test.html` y `qa/diagnostico.html`.
 
 ### Herramientas Recomendadas
 - Lighthouse (Accessibility)
@@ -168,8 +169,21 @@ npx http-server
 ### 3. Prueba Rápida
 ```bash
 # Test.html - Verificar que todo funciona
-http://localhost:8000/test.html
+http://localhost:8000/qa/test.html
 ```
+
+---
+
+## 🧪 Utilidades de QA
+
+Enlaces rápidos para validaciones técnicas y de accesibilidad:
+
+- Test funcional: `http://localhost:8000/qa/test.html`
+- Diagnóstico de dependencias: `http://localhost:8000/qa/diagnostico.html`
+
+Uso recomendado:
+1. Ejecuta `qa/test.html` para comprobar conectividad con la API.
+2. Ejecuta `qa/diagnostico.html` para validar dependencias y estado general.
 
 ---
 
@@ -179,8 +193,9 @@ http://localhost:8000/test.html
 Proyecto 02 ApiGitHub/
 │
 ├── 📄 index.html                    ← Punto de entrada
-├── 📄 test.html                     ← Test rápido
-├── 📄 diagnostico.html              ← Herramienta de debug
+├── 📂 qa/
+│   ├── 📄 test.html                 ← Test rápido
+│   └── 📄 diagnostico.html          ← Herramienta de debug
 │
 ├── 📋 README.md                     ← Este archivo (documentación completa)
 ├── 📝 readme                        ← Notas originales
@@ -791,8 +806,8 @@ window.location = 'https://github.com/login/oauth/authorize?...';
 
 ### Si algo no funciona:
 
-1. **Abre test.html** → Verifica conectividad
-2. **Abre diagnostico.html** → Verifica dependencias
+1. **Abre qa/test.html** → Verifica conectividad
+2. **Abre qa/diagnostico.html** → Verifica dependencias
 3. **Abre DevTools (F12)** → Revisa Console
 4. **Copia el error exacto** → Comparte para debug
 

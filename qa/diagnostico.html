@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Diagnóstico técnico de módulos, elementos DOM y estado de ejecución del cliente GitHub API.">
+    <title>🔧 Diagnóstico - GitHub API Client</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .test {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-left: 4px solid #ddd;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+        .test.success {
+            border-left-color: #4caf50;
+            background: #f1f8f4;
+        }
+        .test.error {
+            border-left-color: #f44336;
+            background: #fdecea;
+        }
+        .test.warning {
+            border-left-color: #ff9800;
+            background: #fff3e0;
+        }
+        .test h3 {
+            font-size: 14px;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        .test p {
+            font-size: 13px;
+            color: #666;
+            margin: 5px 0;
+            font-family: 'Courier New', monospace;
+        }
+        .status {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .status.ok { background: #4caf50; color: white; }
+        .status.fail { background: #f44336; color: white; }
+        .status.warn { background: #ff9800; color: white; }
+        .code {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 3px;
+            font-size: 12px;
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        .skip-link {
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform: translateY(-120%);
+            background: #111827;
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 14px;
+            border-radius: 0 0 6px 0;
+            z-index: 999;
+        }
+        .skip-link:focus,
+        .skip-link:focus-visible {
+            transform: translateY(0);
+            outline: 3px solid #f59e0b;
+        }
+        a:focus-visible,
+        button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible,
+        select:focus-visible {
+            outline: 3px solid #0366d6;
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <a href="#mainContent" class="skip-link">Saltar al contenido principal</a>
+
+    <header role="banner" class="container" style="margin-bottom: 14px;">
+        <h1>🔧 Diagnóstico del Proyecto</h1>
+    </header>
+
+    <main id="mainContent" class="container" role="main" tabindex="-1">
+        <section id="diagnostics" role="region" aria-label="Resultados de diagnóstico" aria-live="polite" aria-busy="true"></section>
+        <div id="diagAnnouncer" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+    </main>
+
+    <script>
+        // Elemento para mostrar resultados
+        const diagnosticsDiv = document.getElementById('diagnostics');
+        const diagAnnouncer = document.getElementById('diagAnnouncer');
+
+        function addTest(title, condition, details = '') {
+            const className = condition ? 'success' : 'error';
+            const status = condition ? 'OK ✓' : 'FALLO ✗';
+            const statusClass = condition ? 'ok' : 'fail';
+
+            const testDiv = document.createElement('div');
+            testDiv.className = `test ${className}`;
+            testDiv.innerHTML = `
+                <h3>${title} <span class="status ${statusClass}">${status}</span></h3>
+                ${details ? `<p>${details}</p>` : ''}
+            `;
+            diagnosticsDiv.appendChild(testDiv);
+        }
+
+        function addWarning(title, details = '') {
+            const testDiv = document.createElement('div');
+            testDiv.className = 'test warning';
+            testDiv.innerHTML = `
+                <h3>${title} <span class="status warn">⚠ AVISO</span></h3>
+                ${details ? `<p>${details}</p>` : ''}
+            `;
+            diagnosticsDiv.appendChild(testDiv);
+        }
+
+        // Test 1: Verificar Axios
+        addTest(
+            'Axios cargado',
+            typeof axios !== 'undefined',
+            `Axios versión: ${typeof axios !== 'undefined' ? (axios.VERSION || 'disponible') : 'NO DISPONIBLE'}`
+        );
+
+        // Test 2: Verificar funciones ui.js
+        addTest(
+            'Funciones ui.js disponibles',
+            typeof getElement === 'function',
+            `getElement: ${typeof getElement === 'function' ? '✓' : '✗'} | mostrarError: ${typeof mostrarError === 'function' ? '✓' : '✗'} | abrirModal: ${typeof abrirModal === 'function' ? '✓' : '✗'}`
+        );
+
+        // Test 3: Verificar funciones api.js
+        addTest(
+            'Funciones api.js disponibles',
+            typeof buscarRepositoriosAPI === 'function',
+            `buscarRepositoriosAPI: ${typeof buscarRepositoriosAPI === 'function' ? '✓' : '✗'} | crearRepositorioAPI: ${typeof crearRepositorioAPI === 'function' ? '✓' : '✗'}`
+        );
+
+        // Test 4: Verificar elementos DOM clave
+        const missingElements = [];
+        const requiredIds = ['searchInput', 'searchButton', 'createRepoBtn', 'reposContainer', 'errorMessage', 'successMessage'];
+        requiredIds.forEach(id => {
+            if (!document.getElementById(id)) {
+                missingElements.push(id);
+            }
+        });
+
+        addTest(
+            'Elementos DOM principales',
+            missingElements.length === 0,
+            `Encontrados: ${requiredIds.length - missingElements.length}/${requiredIds.length}${missingElements.length > 0 ? ` | Faltantes: ${missingElements.join(', ')}` : ''}`
+        );
+
+        // Test 5: Verificar localStorage (para debug)
+        addTest(
+            'localStorage disponible',
+            typeof(Storage) !== 'undefined',
+            'Almacenamiento local disponible'
+        );
+
+        // Test 6: Verificar token
+        addWarning(
+            'Token de GitHub hardcodeado',
+            '⚠️ TOKEN VISIBLE EN CÓDIGO - NO USAR EN PRODUCCIÓN'
+        );
+
+        // Test 7: Variables globales
+        addTest(
+            'Variables globales inicializadas',
+            typeof repoActual !== 'undefined' && typeof usuarioActual !== 'undefined',
+            `repoActual: ${typeof repoActual} | usuarioActual: ${typeof usuarioActual}`
+        );
+
+        // Sumario final
+        const allTests = diagnosticsDiv.querySelectorAll('.test');
+        const passed = diagnosticsDiv.querySelectorAll('.test.success').length;
+        const failed = diagnosticsDiv.querySelectorAll('.test.error').length;
+
+        const summary = document.createElement('div');
+        summary.className = 'test success';
+        summary.innerHTML = `
+            <h3>📊 Resumen</h3>
+            <p>✓ Pasados: ${passed} | ✗ Fallados: ${failed} | ⚠ Advertencias: ${diagnosticsDiv.querySelectorAll('.test.warning').length}</p>
+            ${failed === 0 ? '<p style="color: #4caf50; font-weight: bold;">✅ Todo parece estar bien. Ahora prueba la app en index.html</p>' : '<p style="color: #f44336; font-weight: bold;">❌ Hay problemas. Revisa los errores arriba.</p>'}
+        `;
+        diagnosticsDiv.appendChild(summary);
+
+        // Agregar instrucciones
+        const instructions = document.createElement('div');
+        instructions.className = 'test';
+        instructions.innerHTML = `
+            <h3>📋 Instrucciones Siguientes:</h3>
+            <p>1. Si todo está ✓, abre <strong>index.html</strong></p>
+            <p>2. Abre DevTools: F12 → Console</p>
+            <p>3. Busca un usuario (ej: "facebook")</p>
+            <p>4. Revisa la consola para mensajes de error</p>
+            <p style="margin-top: 15px; font-style: italic; color: #999;">Si encuentras errores, cópialos y comparte aquí</p>
+        `;
+        diagnosticsDiv.appendChild(instructions);
+
+        diagnosticsDiv.setAttribute('aria-busy', 'false');
+        diagAnnouncer.textContent = `Diagnóstico completado. Pasados ${passed}, fallados ${failed} y advertencias ${diagnosticsDiv.querySelectorAll('.test.warning').length}.`;
+    </script>
+</body>
+</html>
