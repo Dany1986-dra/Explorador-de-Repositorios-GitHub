@@ -81,6 +81,8 @@ Como desarrollador con baja visión, he auditado este proyecto para garantizar q
 
 ## ✅ Checklist QA A11y (Evidencias)
 
+[![A11y Score](https://img.shields.io/badge/Accessibility-100%25-brightgreen)](https://pagespeed.web.dev/analysis/https-dany1986-dra-github-io-Explorador-de-Repositorios-GitHub/jmqrgxz9uf?hl=es&form_factor=desktop)
+
 Esta lista está pensada como evidencia rápida para revisiones de QA y auditorías internas.
 
 | Criterio QA | Implementación | Evidencia esperada en prueba |
